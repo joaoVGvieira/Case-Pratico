@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoU - Classificador de E-mails</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .btn-submit.loading .btn-text {
+            opacity: 0;
+        }
+        .spinner {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px; height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .btn-submit.loading .spinner { display: block; }
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .copy-feedback {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a202c; 
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .copy-btn.copied .copy-feedback {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    
+    <div class="container mx-auto max-w-3xl my-12 p-8 bg-white rounded-2xl shadow-xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                Case Prático
+            </h1>
+            <p class="text-lg text-gray-600 mt-2">Inteligência Artificial para otimizar sua comunicação</p>
+        </header>
+
+        <main>
+            <form id="email-form" action="/" method="post" enctype="multipart/form-data">
+                <div class="form-group mb-6">
+                    <textarea name="email_text" id="email_text" rows="8" placeholder="Cole o texto do e-mail aqui" 
+                              class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"></textarea>
+                </div>
+                
+                <div class="separator flex items-center text-gray-500 font-semibold my-8">
+                    <span class="flex-grow border-t border-gray-300"></span>
+                    <span class="mx-4">OU</span>
+                    <span class="flex-grow border-t border-gray-300"></span>
+                </div>
+
+                <div class="form-group mb-6">
+                    <div class="file-drop-area relative flex flex-col items-center justify-center p-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-indigo-500 transition">
+                        <svg class="upload-icon w-12 h-12 text-gray-400 mb-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                        
+                        <span class="file-msg text-gray-600 text-center">
+                            Arraste e solte o arquivo (.txt ou .pdf) aqui ou <strong>clique para selecionar</strong>.
+                        </span>
+                        
+                        <input type="file" name="email_file" id="email_file" class="file-input absolute w-full h-full top-0 left-0 opacity-0 cursor-pointer" accept=".txt,.pdf">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit w-full p-4 border-none rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-lg font-semibold cursor-pointer transition transform hover:scale-105 hover:shadow-lg relative overflow-hidden">
+                    <span class="btn-text">Analisar E-mail</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            {% if resultado %}
+            <div id="results-section" class="results mt-10 pt-10 border-t border-gray-200">
+                <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Análise do E-mail</h2>
+                
+                <div class="result-card bg-gray-50 p-6 rounded-lg shadow-inner border border-gray-200">
+                    
+                    <div class="category-badge inline-block px-4 py-1 rounded-full font-semibold text-sm mb-4
+                                {% if resultado.categoria.lower() == 'produtivo' %}
+                                    bg-green-100 text-green-800
+                                {% elif resultado.categoria.lower() == 'improdutivo' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% else %}
+                                    bg-red-100 text-red-800
+                                {% endif %}
+                    ">
+                        {{ resultado.categoria }}
+                    </div>
+
+                    <h3 class="text-sm font-semibold text-indigo-700 uppercase mb-2">Sugestão de Resposta:</h3>
+                    
+                    <div class="response-container flex justify-between items-start gap-4">
+                        
+                        <p id="suggested-response" class="text-gray-800 text-base leading-relaxed">
+                            {{ resultado.sugestao_resposta }}
+                        </p>
+                        
+                        <button type="button" id="copy-btn" class="copy-btn flex-shrink-0 p-2 rounded-full hover:bg-gray-200 transition relative" title="Copiar resposta">
+                            <svg class="copy-icon w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#5f6368"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-5zm0 16H8V7h11v14z"/></svg>
+                            <span class="copy-feedback">Copiado!</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="text-center mt-12 pt-6 border-t border-gray-200">
+            <p class="text-sm text-gray-500">Desenvolvido por João Vieira/p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
