@@ -10,7 +10,7 @@ Trata-se de uma aplicação web que utiliza a API da Cohere para classificar e-m
 
 A aplicação está hospedada na Render e pode ser acessada diretamente pelo link abaixo:
 
-**[xxxx](xxxx)**
+**[https://case-pratico-b5zo.onrender.com/](https://case-pratico-b5zo.onrender.com/)**
 
 ---
 
