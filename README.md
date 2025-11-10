@@ -26,7 +26,7 @@ A aplicação está hospedada na Render e pode ser acessada diretamente pelo lin
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 * **Backend:** Python com Flask
 * **Inteligência Artificial:** API da Cohere
